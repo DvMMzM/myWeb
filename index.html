@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DKYZ个人分享页</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#7b2cbf',
+                        secondary: '#3b82f6',
+                        danger: '#ef4444',
+                        success: '#10b981',
+                        dark: '#0b0c10',
+                        'dark-card': '#141625',
+                        'dark-border': '#2a2d45'
+                    },
+                    transitionTimingFunction: {
+                        'soft': 'cubic-bezier(0.4, 0, 0.2, 1)',
+                        'bounce-soft': 'cubic-bezier(0.68, -0.55, 0.265, 1.55)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            html {
+                scroll-behavior: smooth;
+            }
+
+            /* 主卡片美化 */
+            .content-card {
+                background: #ffffff;
+                border: 1px solid rgba(0, 0, 0, 0.04);
+                border-radius: 20px;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.02);
+                transition: background-color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+            }
+            .dark .content-card {
+                background: rgba(20, 22, 37, 0.85);
+                border: 1px solid rgba(42, 45, 69, 0.7);
+                box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+                backdrop-filter: blur(20px);
+            }
+
+            /* 列表项美化 */
+            .link-item {
+                transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+                display: block;
+                border-radius: 14px;
+            }
+            .link-item:hover {
+                background-color: #f8fafc;
+                transform: translateX(4px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+            }
+            .link-item:active {
+                transform: translateX(2px) scale(0.99);
+            }
+            .dark .link-item:hover {
+                background-color: rgba(255, 255, 255, 0.05);
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            }
+
+            /* 标签美化 */
+            .tag {
+                font-size: 12px;
+                line-height: 1;
+                padding: 5px 12px;
+                border-radius: 999px;
+                background: #f1f5f9;
+                color: #64748b;
+                transition: all 0.2s ease;
+                user-select: none;
+            }
+            .tag:hover {
+                background: #e2e8f0;
+                transform: translateY(-1px);
+            }
+            .dark .tag {
+                background: rgba(255, 255, 255, 0.07);
+                color: #94a3b8;
+            }
+            .dark .tag:hover {
+                background: rgba(255, 255, 255, 0.12);
+            }
+
+            /* 欢迎页过渡 */
+            .welcome-fade {
+                transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.7s cubic-bezier(0.4, 0, 0.2, 1), transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+                backdrop-filter: blur(16px);
+            }
+            .welcome-hidden {
+                opacity: 0;
+                visibility: hidden;
+                transform: scale(1.02);
+            }
+
+            /* Toast 提示 */
+            .toast {
+                position: fixed;
+                top: 24px;
+                left: 50%;
+                transform: translateX(-50%) translateY(-80px);
+                padding: 11px 22px;
+                border-radius: 14px;
+                background: rgba(17, 24, 39, 0.88);
+                color: white;
+                font-size: 14px;
+                z-index: 100;
+                opacity: 0;
+                transition: all 0.35s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+                backdrop-filter: blur(16px);
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                user-select: none;
+            }
+            .toast.show {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+            .dark .toast {
+                background: rgba(255, 255, 255, 0.92);
+                color: #0f172a;
+                border: 1px solid rgba(0, 0, 0, 0.06);
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            }
+
+            /* 主题切换按钮 */
+            .theme-toggle {
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                user-select: none;
+            }
+            .theme-toggle:hover {
+                transform: rotate(15deg) scale(1.08);
+                box-shadow: 0 6px 16px rgba(123, 44, 191, 0.15);
+            }
+            .theme-toggle:active {
+                transform: rotate(10deg) scale(0.96);
+            }
+
+            /* 全局基础 */
+            body {
+                transition: background-color 0.4s ease, color 0.4s ease;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+            }
+
+            /* 快捷按钮 */
+            .action-btn {
+                user-select: none;
+            }
+            .action-btn:active {
+                transform: scale(0.97);
+            }
+
+            /* 背景柔光 */
+            .bg-glow {
+                position: fixed;
+                inset: 0;
+                pointer-events: none;
+                z-index: -1;
+                overflow: hidden;
+            }
+            .bg-glow::before {
+                content: '';
+                position: absolute;
+                top: -15%;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 700px;
+                height: 700px;
+                border-radius: 50%;
+                background: radial-gradient(circle, rgba(123, 44, 191, 0.07), transparent 65%);
+                filter: blur(40px);
+            }
+            .bg-glow::after {
+                content: '';
+                position: absolute;
+                bottom: -20%;
+                right: -10%;
+                width: 500px;
+                height: 500px;
+                border-radius: 50%;
+                background: radial-gradient(circle, rgba(59, 130, 246, 0.06), transparent 65%);
+                filter: blur(40px);
+            }
+            .dark .bg-glow::before {
+                background: radial-gradient(circle, rgba(123, 44, 191, 0.18), transparent 60%);
+            }
+            .dark .bg-glow::after {
+                background: radial-gradient(circle, rgba(59, 130, 246, 0.12), transparent 60%);
+            }
+
+            /* Logo 渐变质感 */
+            .logo-gradient {
+                background: linear-gradient(135deg, #7b2cbf, #3b82f6);
+                box-shadow: 0 8px 24px rgba(123, 44, 191, 0.25);
+            }
+            .dark .logo-gradient {
+                box-shadow: 0 8px 28px rgba(123, 44, 191, 0.35);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-700 dark:bg-dark dark:text-gray-200 antialiased min-h-screen">
+
+    <!-- 背景柔光 -->
+    <div class="bg-glow"></div>
+
+    <!-- Toast 提示 -->
+    <div id="toast" class="toast">
+        <i class="fa fa-check-circle mr-2"></i>
+        <span id="toastText">操作成功</span>
+    </div>
+
+    <!-- 入场欢迎页 -->
+    <div id="welcomeOverlay" class="welcome-fade fixed inset-0 z-50 flex items-center justify-center bg-gray-50/80 dark:bg-dark/80 px-4">
+        <div class="text-center max-w-sm">
+            <div class="w-20 h-20 mx-auto mb-5 rounded-2xl logo-gradient flex items-center justify-center text-white text-2xl font-bold transition-all duration-300 hover:scale-105">
+                DKYZ
+            </div>
+            <h2 class="text-2xl font-semibold text-gray-900 dark:text-white mb-2">DKYZ个人分享页</h2>
+            <p class="text-gray-500 dark:text-gray-400 text-sm mb-8 leading-relaxed">
+                欢迎来到我的个人分享空间<br>
+                ROOT · 工具 · KernelSU
+            </p>
+            <button id="enterBtn" class="action-btn w-full py-3.5 rounded-xl font-medium text-white shadow-md transition-all duration-300 hover:shadow-lg hover:scale-[1.02]" style="background: linear-gradient(135deg, #7b2cbf, #3b82f6);">
+                进入本站
+            </button>
+        </div>
+    </div>
+
+    <!-- 主题切换按钮 -->
+    <button id="themeToggle" class="theme-toggle fixed top-6 right-6 z-40 w-11 h-11 rounded-full bg-white dark:bg-dark-card border border-gray-200 dark:border-dark-border shadow-sm flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-primary">
+        <i class="fa fa-moon-o text-base dark:hidden"></i>
+        <i class="fa fa-sun-o text-base hidden dark:inline"></i>
+    </button>
+
+    <div class="container mx-auto px-4 py-12 max-w-xl">
+
+        <!-- 顶部个人信息 -->
+        <div class="text-center mb-8">
+            <div class="w-16 h-16 mx-auto mb-3 rounded-full logo-gradient flex items-center justify-center text-white text-xl font-bold shadow-md transition-transform duration-300 hover:scale-105">
+                DKYZ
+            </div>
+            <h1 class="text-lg font-semibold text-gray-900 dark:text-white">DKYZ个人分享</h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">专注分享 · 持续更新</p>
+        </div>
+
+        <!-- 主内容卡片 -->
+        <div class="content-card p-6">
+
+            <!-- 欢迎语 -->
+            <div class="mb-6">
+                <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                    欢迎访问我的个人分享页。这里整理了一些玩机资源、工具软件和实用资源，所有内容均为个人收集整理，仅供学习交流使用。
+                </p>
+            </div>
+
+            <!-- 快捷按钮 -->
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <a href="https://wwbld.lanzouw.com/b0188k05od" target="_blank" rel="noopener noreferrer" class="action-btn flex flex-col items-center justify-center py-4 rounded-xl text-white text-sm font-medium transition-all duration-300 hover:scale-105 hover:shadow-lg" style="background: linear-gradient(135deg, #ef4444, #f97316);">
+                    <i class="fa fa-download text-lg mb-1"></i>
+                    资源下载
+                    <i class="text-[10px] opacity-80 mt-0.5">密码6666</i>
+                </a>
+                <!-- QQ 点击复制 -->
+                <div id="qqBtn" class="action-btn flex flex-col items-center justify-center py-4 rounded-xl text-white text-sm font-medium cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg" style="background: linear-gradient(135deg, #3b82f6, #60a5fa);">
+                    <i class="fa fa-qq text-lg mb-1"></i>
+                    <span>QQ群: 1087908226</span>
+                    <span class="text-[10px] opacity-80 mt-0.5">点击复制</span>
+                </div>
+            </div>
+
+            <!-- 资源列表 -->
+            <a href="https://dkyz.lanzouw.com/b0188k2mwf" target="_blank" rel="noopener noreferrer" class="link-item p-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-500/10 text-secondary dark:text-blue-400 flex items-center justify-center">
+                            <i class="fa fa-file-zip-o"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-sm">隐藏环境所需资源</div>
+                            <div class="text-xs text-gray-400 dark:text-gray-500">密码6666</div>
+                        </div>
+                    </div>
+                    <i class="fa fa-angle-right text-gray-300 dark:text-gray-600"></i>
+                </div>
+            </a>
+
+            <a href="https://dkyz.lanzouw.com/b0188k2nkj" target="_blank" rel="noopener noreferrer" class="link-item p-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-500/10 text-secondary dark:text-blue-400 flex items-center justify-center">
+                            <i class="fa fa-file-zip-o"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-sm">游戏资源</div>
+                            <div class="text-xs text-gray-400 dark:text-gray-500">密码6666</div>
+                        </div>
+                    </div>
+                    <i class="fa fa-angle-right text-gray-300 dark:text-gray-600"></i>
+                </div>
+            </a>
+
+            <a href="https://dkyz.lanzouw.com/b0188k2nnc" target="_blank" rel="noopener noreferrer" class="link-item p-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-green-50 dark:bg-green-500/10 text-success dark:text-green-400 flex items-center justify-center">
+                            <i class="fa fa-file-code-o"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-sm">杂项</div>
+                            <div class="text-xs text-gray-400 dark:text-gray-500">密码6666</div>
+                        </div>
+                    </div>
+                    <i class="fa fa-angle-right text-gray-300 dark:text-gray-600"></i>
+                </div>
+            </a>
+
+            <!-- 底部标签 -->
+            <div class="mt-6 flex flex-wrap gap-2">
+                <span class="tag">KernelSU</span>
+                <span class="tag">玩机工具</span>
+                <span class="tag">游戏辅助</span>
+                <span class="tag">环境分享</span>
+            </div>
+
+        </div>
+
+        <!-- 页脚 -->
+        <footer class="text-center text-xs text-gray-400 dark:text-gray-500 mt-8">
+            <p>© 2026 DKYZ个人分享 · 用心整理每一份资源</p>
+        </footer>
+
+    </div>
+
+    <script>
+        // Toast 提示函数
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastText').textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        // 主题切换
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            html.classList.add('dark');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            const isDark = html.classList.contains('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            showToast(isDark ? '已切换深色模式' : '已切换浅色模式');
+        });
+
+        // 欢迎页进入
+        document.getElementById('enterBtn').addEventListener('click', () => {
+            document.getElementById('welcomeOverlay').classList.add('welcome-hidden');
+        });
+
+        // 一键复制QQ
+        document.getElementById('qqBtn').addEventListener('click', () => {
+            navigator.clipboard.writeText('1087908226').then(() => {
+                showToast('群号已复制');
+            }).catch(() => {
+                showToast('复制失败，请手动复制');
+            });
+        });
+    </script>
+</body>
+</html>
